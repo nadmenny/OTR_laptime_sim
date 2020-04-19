@@ -7,5 +7,6 @@ f_tractc = (cont_trq./r_wheel);
 f_drag = 0.5.*p.*(Vinst.^2).*A.*Cd;
 f_netc = f_tractc - f_drag;
 f_netp = f_tractp - f_drag;
-a_tract = f_net/m;
+a_tractc = f_netc/m;
+a_tractp = f_netp/m;
 end
