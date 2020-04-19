@@ -34,5 +34,17 @@ end
 [Vmax,R] = maxvel(x,y,Cd,A,m,mu,p,g);
 
 %% Max Entry Velocity at Each Point
+<<<<<<< Updated upstream
 [Vmax_entry] = maxvel_entry(Vmax,Cd,A,m,mu,p,g,R,seg);
 %plot(x,Vmax_entry, 'r-', x, Vmax, 'bl');
+=======
+[Vmax_entry, Fs] = maxvel_entry(Vmax,Cd,A,m,mu,p,g,R,seg);
+%plot(x,Vmax_entry, 'r-', x, Vmax, 'bl');
+
+%% Tractive Force Caclulations
+[f_net] = f_tract(wc_trq, wp_trq, r_wheel, Cd,A,m,mu,p,g);
+
+
+%% Sector Velocity
+v = v_inst(a_tract,seg,Vmax_entry);
+>>>>>>> Stashed changes
