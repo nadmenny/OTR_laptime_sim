@@ -1,4 +1,5 @@
 % % % Lap time simulator for OTR FSAE Electric % % %
+
 % This is the main function to initiate a sim
 clear; clc;
 
@@ -18,11 +19,15 @@ A = 1.328; %Area m^2
 
 %% Track
 x1 = 0:1:5;
-y1 = sqrt(5^2 - x1.^2);
+
+y1 = sqrt(5.^2 - x1.^2);
 x = [-3,-2,-1,x1,5,5,5];
 y = [5,5,5,y1,-1,-2,-3];
 s = 5; %track section length
-
+plot(x,y)
+for i = 2:length(x)
+seg(i) = sqrt((x(i)-x(i-1))^2 + (y(i)-y(i-1))^2);
+end
 %% Powertrain Parameters
 [wp_trq, wc_trq] = emrax_dat(wheel_rpm, final_dr, drv_eff); %peak and cont trq @wheel
 
