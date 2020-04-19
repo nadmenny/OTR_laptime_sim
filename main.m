@@ -38,7 +38,7 @@ end
 %plot(x,Vmax_entry, 'r-', x, Vmax, 'bl');
 
 %% Tractive Force Caclulations
-[f_net, Vinst] = f_tract(cont_trq, peak_trq, r_wheel,m, Cd,A,Vinst,p);
+[Vinst, a_tractp, a_tractc] = f_tract(cont_trq, peak_trq, r_wheel,m, Cd,A,Vinst,p);
 
 %% Sector Velocity
 v = v_inst(a_tract,seg,Vmax_entry);
