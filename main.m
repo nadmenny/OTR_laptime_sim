@@ -1,8 +1,6 @@
 % % % Lap time simulator for OTR FSAE Electric % % %
 
 % This is the main function to initiate a sim
-
-% This is the main function to initiate a sim
 clear; clc;
 
 %% Vehicle Parameters
@@ -21,6 +19,7 @@ A = 1.328; %Area m^2
 
 %% Track
 x1 = 0:1:5;
+
 y1 = sqrt(5.^2 - x1.^2);
 x = [-3,-2,-1,x1,5,5,5];
 y = [5,5,5,y1,-1,-2,-3];
@@ -37,8 +36,4 @@ end
 % plot(x,Vmax);
 
 %% Max Entry Velocity at Each Point
-%%Vmax_entry = maxvel_entry(Vmax,Cd,A,m,mu,p,g,R,s);
-% Fn = m*g;
-% Fs = 0.5.*p.*(Vmax.^2).*A.*Cd + sqrt((mu.*Fn).^2 - (m.^2.*Vmax.^4)./(R.^2));
-% V_entry = sqrt((Vmax.^2) + (2.*seg.*Fs)./m);
-
+Vmax_entry = maxvel_entry(Vmax,Cd,A,m,mu,p,g,R,s);
