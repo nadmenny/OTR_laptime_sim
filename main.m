@@ -42,3 +42,4 @@ end
 
 %% Sector Velocity
 V_exit = v_inst(accel,seg,V_entry);
+%
