@@ -41,4 +41,5 @@ end
 [Vinst, a_tractp, a_tractc] = f_tract(cont_trq, peak_trq, r_wheel,m, Cd,A,Vinst,p);
 
 %% Sector Velocity
-v = v_inst(a_tract,seg,Vmax_entry);
+V_exit = v_inst(accel,seg,V_entry);
+%
