@@ -42,3 +42,6 @@ end
 
 %% Sector Velocity
 v = v_inst(a_tract,seg,Vmax_entry);
+
+%% Lap Iteration Function
+[V,t] = lap_iter(chg, Vmax, Vmax_entry)
