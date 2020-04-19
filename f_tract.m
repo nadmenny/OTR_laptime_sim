@@ -1,6 +1,6 @@
 %% Tractive Force Equations
 
-function [f_netc, f_netp, Vinst, a_tract] = f_tract(cont_trq, peak_trq, r_wheel,m, Cd,A,Vinst,p)
+function [f_netc, f_netp, Vinst, a_tractc, a_tractp] = f_tract(cont_trq, peak_trq, r_wheel,m, Cd,A,Vinst,p)
 
 f_tractp = (peak_trq./r_wheel);
 f_tractc = (cont_trq./r_wheel);
