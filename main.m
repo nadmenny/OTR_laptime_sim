@@ -7,8 +7,8 @@ clear; clc;
 final_dr = 3.8; %final drive ratio
 drv_eff = 1; %driveline efficiency
 r_wheel = 0.2286; %radius wheel
-wheel_rpm = 800; %input wheel RPM
-
+wheel_rpm = linspace(0,800,100); %input wheel RPM
+v_inst = 0; %m/s instantaenous velocity at the start
 g = 9.81; % gravitational acceleration m/s^2
 m = 300; %Mass kg
 mu = 1.4; %friction Coefficient
@@ -30,21 +30,15 @@ end
 %% Powertrain Parameters
 [wp_trq, wc_trq] = emrax_dat(wheel_rpm, final_dr, drv_eff); %peak and cont trq @wheel
 
-%% Max Velocity at Each Point
+%% Max Corner Velocity at Each Point
 [Vmax,R] = maxvel(x,y,Cd,A,m,mu,p,g);
 
 %% Max Entry Velocity at Each Point
-<<<<<<< Updated upstream
-[Vmax_entry] = maxvel_entry(Vmax,Cd,A,m,mu,p,g,R,seg);
-%plot(x,Vmax_entry, 'r-', x, Vmax, 'bl');
-=======
 [Vmax_entry, Fs] = maxvel_entry(Vmax,Cd,A,m,mu,p,g,R,seg);
 %plot(x,Vmax_entry, 'r-', x, Vmax, 'bl');
 
 %% Tractive Force Caclulations
-[f_net] = f_tract(wc_trq, wp_trq, r_wheel, Cd,A,m,mu,p,g);
-
+[f_net, Vinst] = f_tract(cont_trq, peak_trq, r_wheel,m, Cd,A,Vinst,p);
 
 %% Sector Velocity
 v = v_inst(a_tract,seg,Vmax_entry);
->>>>>>> Stashed changes
