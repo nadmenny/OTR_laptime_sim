@@ -8,7 +8,7 @@ final_dr = 3.8; %final drive ratio
 drv_eff = 1; %driveline efficiency
 r_wheel = 0.2286; %radius wheel
 wheel_rpm = linspace(0,800,100); %input wheel RPM
-
+v_inst = 0; %m/s instantaenous velocity at the start
 g = 9.81; % gravitational acceleration m/s^2
 m = 300; %Mass kg
 mu = 1.4; %friction Coefficient
@@ -38,4 +38,7 @@ end
 %plot(x,Vmax_entry, 'r-', x, Vmax, 'bl');
 
 %% Tractive Force Caclulations
-[f_net] = f_tract(wc_trq, wp_trq, r_wheel, Cd,A,m,mu,p,g);
+[f_net, Vinst] = f_tract(cont_trq, peak_trq, r_wheel,m, Cd,A,Vinst,p);
+
+%% Velocity Instantaneous
+
