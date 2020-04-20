@@ -41,14 +41,14 @@ n_seg = length(seg);
 [Vmax,R] = maxvel(x,y,Cd,A,m,mu,p,g);
 
 %% Max Entry Velocity at Each Point
-[Vmax_entry,Fs] = maxvel_entry(Vmax,Cd,A,m,mu,p,g,R,seg);
+%[Vmax_entry,Fs] = maxvel_entry(Vmax,Cd,A,m,mu,p,g,R,seg);
 %plot(x,Vmax_entry, 'r-', x, Vmax, 'bl');
 
 %% Simulation Main Loop
-chg = 10;
-V = zeros(1,n_seg+1);
-Vold = Vmax; %initialize matrix for convergance
-Vmax_entry(n_seg+1) = Vmax_entry(1);
+% chg = 10;
+% V = zeros(1,n_seg+1);
+% Vold = Vmax; %initialize matrix for convergance
+% Vmax_entry(n_seg+1) = Vmax_entry(1);
 
 % while max(abs(V - Vold)) > chg
     for i = 1:n_seg
@@ -63,7 +63,14 @@ Vmax_entry(n_seg+1) = Vmax_entry(1);
         V_inst(i+1) = v_inst(a_tractp,a_tractc,seg(i),V_inst(i));
         
         %% Lap Iteration Function
-        [brake_flag] = lap_iter(V_inst(i),Vmax_entry(i+1));
+%         [brake_flag] = lap_iter(V_inst(i),Vmax_entry(i+1));
+        [brake_flag] = lap_iter(V_inst(i+1),Vmax(i+1));
+        if brake_flag == 1
+            V_inst(i+1) = Vmax(i+1);
+            V_inst = backtrack(V_inst,m,seg,Cd,A,mu,p,g,R);
+        end
         
     end
+    %%
+    scatter(x,y,[],V_inst(1:94),'fill');
 % end
