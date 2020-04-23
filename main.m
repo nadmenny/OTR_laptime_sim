@@ -18,13 +18,11 @@ p = 1.225; % Density Kg/m^3
 A = 1.328; % Area m^2
 
 %% Track data
-
 fid = fopen('track3.txt');
 data = textscan(fid,'%f%f','Delimiter',' ');
 fclose(fid);
 x = data{1,1}.*275;
 y = data{1,2}.*275;
-%plot(x,y)
 
 %% track data processing
 %calc length between each point
@@ -49,6 +47,7 @@ max_speed = ones(1,length(x)).*(max_rpm*(2*pi/(60*final_dr))*r_wheel);
 %% Simulation Main Loop
 V_sim = zeros(1,length(x)); % initialize simulation velocity array
 f_brake = zeros(1,length(x)); % initialize braking force array
+acceleration = zeros(1,length(x)); %initialize acceleration array
 
     for i = 1:n_seg-1
         
@@ -57,6 +56,9 @@ f_brake = zeros(1,length(x)); % initialize braking force array
         
         %% Tractive Force Caclulations
         [a_tractp,a_tractc] = f_tract(wc_trq,wp_trq,r_wheel,m,Cd,A,V_sim(i),p,max_rpm,final_dr); %outputs tractive acceleration
+        
+        %% acceleration
+        acceleration(i) = a_tractc/g; % get tractive acceleration
        
         %% Sector Velocity
         V_sim(i+1) = v_inst(a_tractp,a_tractc,seg(i),V_sim(i)); %outputs exit speed from entry speed V_sim(i)
@@ -65,9 +67,10 @@ f_brake = zeros(1,length(x)); % initialize braking force array
         [brake_flag] = lap_iter(V_sim(i+1),Vmax_allow(i+1)); % compares sim exit speed to max attainable exit speed at a point on the track
         if brake_flag == 1 %if exit speed is greater than max allowable speed then back track and apply braking
            V_sim(i+1) = Vmax_allow(i+1); % assign exit speed equal to max allowable speed
-           [V_sim(1:i+1),f_brake(1:i+1)] = backtrack(V_sim(1:i+1),m,seg,Cd,A,mu,p,g,R,f_brake(1:i+1)); %array is redefined with braking zones
+           [V_sim(1:i+1),f_brake(1:i+1),acceleration(1:i+1)] = backtrack(V_sim(1:i+1),m,seg,Cd,A,mu,p,g,R,f_brake(1:i+1),acceleration(1:i+1)); %array is redefined with braking zones
         end
     end 
+    
 %% plot data:
 
 %track plot with velocity heat map
@@ -81,23 +84,33 @@ surf([x(:) x(:)], [y(:) y(:)], [z(:) z(:)], ...  % Reshape and replicate data
 view(2);   % Default 2-D view
 colorbar;
 colormap(flipud(jet))% Add a colorbar
-title('track Map with Simulated Velocity');
+title('track Map with Simulated Velocity (Km/h)');
 
-%Velocity Vs Dist
+%track plot with Acceleration heat map
+    figure(1)
+    subplot(2,2,3)
+    z = acceleration;
+surf([x(:) x(:)], [y(:) y(:)], [z(:) z(:)], ...  % Reshape and replicate data
+     'FaceColor', 'none', ...    % Don't bother filling faces with color
+     'EdgeColor', 'interp', ...  % Use interpolated color for edges
+     'LineWidth', 10);            % Make a thicker line
+view(2);   % Default 2-D view
+colorbar;
+colormap(flipud(jet))% Add a colorbar
+title('track Map with Acceleration (G)');
+
+%Velocity Vs Accel Vs Dist
 subplot(2,2,2)
-plot(dist,V_sim.*3.6,'b-')
+plot(dist,V_sim.*3.6,'b-');
 title('Velocity Vs Dist')
 xlabel('Distance (m)');
 ylabel('Velocity (Km/h)')
 
 % Braking force Vs Dist
 subplot(2,2,4)
-plot(dist,f_brake,'k-');
-title('Braking force Vs Dist');
+plot(dist,acceleration,'g-');
+title('Acceleration Vs Dist');
 xlabel('Distance (m)');
-ylabel('brake Force (N)')
+ylabel('Acceleration (G)')
 
-%track Map
-subplot(2,2,3)
-plot(x,y,'g-');
-title('Track Map');
+
