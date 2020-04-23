@@ -1,15 +1,16 @@
-function V_inst = backtrack(V_inst,m,seg,Cd,A,mu,p,g,R)
+function [V_sim_new,f_brake_new] = backtrack(V_sim,m,seg,Cd,A,mu,p,g,R,f_brake)
 
-
-for i = length(V_inst)-1:-1:2
-    F_brake = (V_inst(i)^2-V_inst(i-1)^2)*m/(2*seg(i));
-    Fs = maxvel_entry(V_inst(i),Cd,A,m,mu,p,g,R(i),seg(i));
-    if abs(F_brake) < Fs
+for i = length(V_sim):-1:2
+    [V_entry,Fs] = maxvel_entry(V_sim(i),Cd,A,m,mu,p,g,R(i),seg(i));
+    f_brake(i) = Fs;
+    if V_sim(i-1) < V_entry
         break;
     else
-        V_inst(i-1) = sqrt((V_inst(i).^2) + (2.*seg(i).*Fs)./m);
+        V_sim(i-1) = V_entry;
     end
 end
+V_sim_new = V_sim;
+f_brake_new = f_brake;
 end
 
 
