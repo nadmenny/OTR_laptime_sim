@@ -48,7 +48,7 @@ max_speed = ones(1,length(x)).*(max_rpm*(2*pi/(60*final_dr))*r_wheel);
 V_sim = zeros(1,length(x)); % initialize simulation velocity array
 f_brake = zeros(1,length(x)); % initialize braking force array
 acceleration = zeros(1,length(x)); %initialize acceleration array
-
+tic
     for i = 1:n_seg-1
         
         %% Powertrain Parameters
@@ -70,7 +70,8 @@ acceleration = zeros(1,length(x)); %initialize acceleration array
            [V_sim(1:i+1),f_brake(1:i+1),acceleration(1:i+1)] = backtrack(V_sim(1:i+1),m,seg,Cd,A,mu,p,g,R,f_brake(1:i+1),acceleration(1:i+1)); %array is redefined with braking zones
         end
     end 
-    
+  toc
+  time = toc-tic; % simulation time
 %% plot data:
 
 %track plot with velocity heat map
