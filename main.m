@@ -21,8 +21,9 @@ A = 1.328; % Area m^2
 fid = fopen('track3.txt');
 data = textscan(fid,'%f%f','Delimiter',' ');
 fclose(fid);
-x = data{1,1}.*275;
-y = data{1,2}.*275;
+scale = 1000;
+x = data{1,1}.*scale;
+y = data{1,2}.*scale;
 
 %% track data processing
 %calc length between each point
@@ -40,7 +41,7 @@ max_speed = ones(1,length(x)).*(max_rpm*(2*pi/(60*final_dr))*r_wheel);
 %% Max Corner Velocity and point Radius
 [Vmax_allow,R] = maxvel(x,y,Cd,A,m,mu,p,g); %calculates the maximum allowable cornering speed on each point of the track
 
-%% Max Entry Velocity at Each Point 
+%% Max Entry Velocity at Each Point
 [V_entry,F_maxbrake] = maxvel_entry(Vmax_allow,Cd,A,m,mu,p,g,R,seg); %based on maximum velocity allowable at each point on the track
 % ******Note********** : this part may not be needed for sim
 
@@ -48,57 +49,71 @@ max_speed = ones(1,length(x)).*(max_rpm*(2*pi/(60*final_dr))*r_wheel);
 V_sim = zeros(1,length(x)); % initialize simulation velocity array
 f_brake = zeros(1,length(x)); % initialize braking force array
 acceleration = zeros(1,length(x)); %initialize acceleration array
-tic
-    for i = 1:n_seg-1
-        
-        %% Powertrain Parameters
-        [wp_trq,wc_trq] = emrax_dat(V_sim(i),r_wheel,final_dr,drv_eff); %peak and cont trq @wheel
-        
-        %% Tractive Force Caclulations
-        [a_tractp,a_tractc] = f_tract(wc_trq,wp_trq,r_wheel,m,Cd,A,V_sim(i),p,max_rpm,final_dr); %outputs tractive acceleration
-        
-        %% acceleration
-        acceleration(i) = a_tractc/g; % get tractive acceleration
-       
-        %% Sector Velocity
-        V_sim(i+1) = v_inst(a_tractp,a_tractc,seg(i),V_sim(i)); %outputs exit speed from entry speed V_sim(i)
-        
-         %% Lap Iteration Function
-        [brake_flag] = lap_iter(V_sim(i+1),Vmax_allow(i+1)); % compares sim exit speed to max attainable exit speed at a point on the track
-        if brake_flag == 1 %if exit speed is greater than max allowable speed then back track and apply braking
-           V_sim(i+1) = Vmax_allow(i+1); % assign exit speed equal to max allowable speed
-           [V_sim(1:i+1),f_brake(1:i+1),acceleration(1:i+1)] = backtrack(V_sim(1:i+1),m,seg,Cd,A,mu,p,g,R,f_brake(1:i+1),acceleration(1:i+1)); %array is redefined with braking zones
-        end
-    end 
-  toc
-  time = toc-tic; % simulation time
+
+
+for i = 1:n_seg-1
+    
+    %% Powertrain Parameters
+    [wp_trq,wc_trq] = emrax_dat(V_sim(i),r_wheel,final_dr,drv_eff); %peak and cont trq @wheel
+    
+    %% Tractive Force Caclulations
+    [a_tractp,a_tractc] = f_tract(wc_trq,wp_trq,r_wheel,m,Cd,A,V_sim(i),p,max_rpm,final_dr); %outputs tractive acceleration
+    
+    %% acceleration
+    acceleration(i) = a_tractc/g; % get tractive acceleration
+    
+    %% Sector Velocity
+    V_sim(i+1) = v_inst(a_tractp,a_tractc,seg(i),V_sim(i)); %outputs exit speed from entry speed V_sim(i)
+    
+    %% Lap Iteration Function
+    [brake_flag] = lap_iter(V_sim(i+1),Vmax_allow(i+1)); % compares sim exit speed to max attainable exit speed at a point on the track
+    if brake_flag == 1 %if exit speed is greater than max allowable speed then back track and apply braking
+        V_sim(i+1) = Vmax_allow(i+1); % assign exit speed equal to max allowable speed
+        [V_sim(1:i+1),f_brake(1:i+1),acceleration(1:i+1)] = backtrack(V_sim(1:i+1),m,seg,Cd,A,mu,p,g,R,f_brake(1:i+1),acceleration(1:i+1)); %array is redefined with braking zones
+    end
+end
+
+%% Total Time
+time = transpose(zeros(1,length(x)));
+for i = 1:n_seg
+    coeff = [0.5*acceleration(i) V_sim(i) -seg(i)];
+    root = transpose(roots(coeff));
+    pos_root = root.*(root>=0);
+    time(i,1:2) = pos_root;
+
+%     pos_root = root.*(root>=0);
+%     time(i) = pos_root(i);
+end
+total_time = sum(time);
+laptime = total_time(1,2);
+
 %% plot data:
 
 %track plot with velocity heat map
-    figure(1)
-    subplot(2,2,1)
-    z = V_sim.*3.6;
+figure(1)
+subplot(2,2,1)
+z = V_sim.*3.6;
 surf([x(:) x(:)], [y(:) y(:)], [z(:) z(:)], ...  % Reshape and replicate data
-     'FaceColor', 'none', ...    % Don't bother filling faces with color
-     'EdgeColor', 'interp', ...  % Use interpolated color for edges
-     'LineWidth', 10);            % Make a thicker line
+    'FaceColor', 'none', ...    % Don't bother filling faces with color
+    'EdgeColor', 'interp', ...  % Use interpolated color for edges
+    'LineWidth', 4);            % Make a thicker line
 view(2);   % Default 2-D view
 colorbar;
 colormap(flipud(jet))% Add a colorbar
-title('track Map with Simulated Velocity (Km/h)');
+title('Velocity Map (Km/h)');
 
 %track plot with Acceleration heat map
-    figure(1)
-    subplot(2,2,3)
-    z = acceleration;
+figure(1)
+subplot(2,2,3)
+z = acceleration;
 surf([x(:) x(:)], [y(:) y(:)], [z(:) z(:)], ...  % Reshape and replicate data
-     'FaceColor', 'none', ...    % Don't bother filling faces with color
-     'EdgeColor', 'interp', ...  % Use interpolated color for edges
-     'LineWidth', 10);            % Make a thicker line
+    'FaceColor', 'none', ...    % Don't bother filling faces with color
+    'EdgeColor', 'interp', ...  % Use interpolated color for edges
+    'LineWidth', 4);            % Make a thicker line
 view(2);   % Default 2-D view
 colorbar;
 colormap(flipud(jet))% Add a colorbar
-title('track Map with Acceleration (G)');
+title('Accel(g)');
 
 %Velocity Vs Accel Vs Dist
 subplot(2,2,2)
