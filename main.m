@@ -50,6 +50,7 @@ V_sim = zeros(1,length(x)); % initialize simulation velocity array
 f_brake = zeros(1,length(x)); % initialize braking force array
 acceleration = zeros(1,length(x)); %initialize acceleration array
 
+
 for i = 1:n_seg-1
     
     %% Powertrain Parameters
